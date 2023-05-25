@@ -1,0 +1,89 @@
+services:
+
+  domoticz:
+    build:
+      context: ./domoticz
+    image: tone/domoticz
+    container_name: domoticz
+    hostname: domoticz
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Prague
+    volumes:
+      - data_domoticz:/config
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+#      - /sys:/sys:rw   #GPIO access
+    ports:
+      - 8080:8080
+      - 6144:6144
+#      - 1443:1443
+    devices:
+#      - /dev/ttyUSB_rf433:/dev/ttyUSB0   # USB access
+#      - /dev/i2c-1:/dev/i2c-0    # I2C access
+    restart: unless-stopped
+
+  mosquito:
+    image: eclipse-mosquitto
+    container_name: mosquitto
+    hostname: mosquitto
+    volumes:
+      - data_mosquitto:/mosquitto
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 1883:1883
+#      - 9001:9001
+    restart: unless-stopped
+
+#    mysgwrf24:
+#      build:
+#        context: ./mysgwrf24
+#      image: tone/mysgwrf24
+#      container_name: mysgwrf24
+#      hostname: mysgwrf24
+#      privileged: true
+#      volumes:
+#        - data_mysgw:/data
+#        - /sys:/sys:rw
+#      #ports:
+#        #- 5003:5003
+#      restart: unless-stopped
+          
+  mysgw485:
+    build:
+      context: ./mysgw485
+    image: tone/mysgw485
+    container_name: mysgw485
+    hostname: mysgw485
+    volumes:
+      - data_mysgw:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    devices:
+      - /dev/ttyUSB_rs485:/dev/ttyMYSGW
+    restart: unless-stopped
+
+  dzga:
+    build:
+      context: ./dzga
+    image: tone/dzga
+    container_name: dzga
+    hostname: dzga
+    environment:
+      - PUID=1010
+      - PGID=1010
+    volumes:
+      - data_dzga:/config
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 3030:3030
+    restart: unless-stopped
+
+volumes:
+  data_domoticz:
+  data_mosquitto:
+  data_mysgw:
+  data_dzga:
