@@ -19,7 +19,7 @@ services:
       - 8080:8080
       - 6144:6144
 #      - 1443:1443
-    devices:
+#    devices:
 #      - /dev/ttyUSB_rf433:/dev/ttyUSB0   # USB access
 #      - /dev/i2c-1:/dev/i2c-0    # I2C access
     restart: unless-stopped

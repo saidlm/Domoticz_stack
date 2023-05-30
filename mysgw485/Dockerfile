@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:3.12
 
 # set version label
 MAINTAINER Martin Saidl, martin.saidl@tone.cz
@@ -7,6 +7,7 @@ RUN \
   echo "**** install build packages ****" && \
   apk update --no-cache && \ 
   apk add --no-cache --virtual=build-dependencies \
+	bash \
         autoconf \
         automake \
         binutils \
