@@ -25,9 +25,7 @@ fi
 
 echo "Starting domoticz ..."
 if [ $1 == "/opt/domoticz/domoticz" ]; then
-  echo "11111111111111111111111"
   exec $@ -approot /opt/domoticz/ -userdata /config/ -noupdate 
 else
-  echo "222222222222222222222222222"
   exec "$@"
 fi
