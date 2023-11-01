@@ -45,7 +45,10 @@ RUN echo "**** install domoticz required runtime packages ****" && \
     uvccapture && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-  pip3 install setuptools requests
+  pip3 install \
+    setuptools \
+    requests \
+    pymodbus
   
 
 RUN echo "**** install domoticz ****" && \ 
