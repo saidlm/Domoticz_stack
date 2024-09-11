@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 # set version label
 LABEL maintainer="martin.saidl@tone.cz"
@@ -28,10 +28,11 @@ RUN echo "**** install domoticz required runtime packages ****" && \
     libcap2-bin \
     libcurl3-gnutls \
     libcurl4 \
-    libpython3.9 \
+    libpython3.11 \
     libudev-dev \
     libusb-0.1-4 \
     libsqlite3-0 \
+    netcat-traditional \
     mosquitto-clients \
     python3-pip \
     python3-requests \
@@ -45,10 +46,11 @@ RUN echo "**** install domoticz required runtime packages ****" && \
     uvccapture && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-  pip3 install \
+  rm /usr/lib/python3.11/EXTERNALLY-MANAGED && \
+  pip3 install \ 
     setuptools \
     requests \
-    pymodbus
+    pymodbus 
   
 
 RUN echo "**** install domoticz ****" && \ 
@@ -62,9 +64,13 @@ RUN echo "**** install domoticz ****" && \
   tar xfz /tmp/domoticz.tgz && \
   mkdir -p /config && \
   if [ ${MACH} = "armv7l" ]; then \
-    ln -s /usr/lib/arm-linux-gnueabihf/libpython3.9.so.1 /usr/lib/arm-linux-gnueabihf/libpython3.9.so; \
+    ln -s /usr/lib/arm-linux-gnueabihf/libpython3.11.so.1 /usr/lib/arm-linux-gnueabihf/libpython3.11.so && \
+    wget http://security.debian.org/debian-security/pool/updates/main/o/openssl/libssl1.1_1.1.1n-0+deb11u5_armhf.deb && \
+    dpkg -i 'libssl1.1_1.1.1n-0+deb11u5_armhf.deb'; \
   else \
-    ln -s /usr/lib/x86_64-linux-gnu//libpython3.9.so.1 /usr/lib/x86_64-linux-gnu//libpython3.9.so; \
+    ln -s /usr/lib/x86_64-linux-gnu/libpython3.11.so.1 /usr/lib/x86_64-linux-gnu/libpython3.11.so && \
+    wget http://security.debian.org/debian-security/pool/updates/main/o/openssl/libssl1.1_1.1.1n-0+deb11u5_i386.deb && \
+    dpkg -i 'libssl1.1_1.1.1n-0+deb11u5_i386.deb'; \
   fi && \
   rm -rf /tmp/* /var/tmp/*
 
