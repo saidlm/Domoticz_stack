@@ -22,9 +22,13 @@ services:
 #    devices:
 #      - /dev/ttyUSB_rf433:/dev/ttyUSB0   # USB access
 #      - /dev/i2c-1:/dev/i2c-0    # I2C access
+    logging:
+      driver: syslog
+      options:
+        tag: domotic
     restart: unless-stopped
 
-  mosquito:
+  mosquitto:
     image: eclipse-mosquitto
     container_name: mosquitto
     hostname: mosquitto
@@ -35,6 +39,10 @@ services:
     ports:
       - 1883:1883
 #      - 9001:9001
+    logging:
+      driver: syslog
+      options:
+        tag: mosquitto
     restart: unless-stopped
 
 #    mysgwrf24:
@@ -63,27 +71,66 @@ services:
       - /etc/localtime:/etc/localtime:ro
     devices:
       - /dev/ttyUSB_rs485:/dev/ttyMYSGW
+    logging:
+      driver: syslog
+      options:
+        tag: mysgw485
     restart: unless-stopped
 
-  dzga:
-    build:
-      context: ./dzga
-    image: tone/dzga
-    container_name: dzga
-    hostname: dzga
+#  dzga:
+#    build:
+#      context: ./dzga
+#    image: tone/dzga
+#    container_name: dzga
+#    hostname: dzga
+#    environment:
+#      - PUID=1010
+#      - PGID=1010
+#    volumes:
+#      - data_dzga:/config
+#      - /etc/timezone:/etc/timezone:ro
+#      - /etc/localtime:/etc/localtime:ro
+#    ports:
+#      - 3030:3030
+#    restart: unless-stopped
+
+  tasmoadmin:
+    image: ghcr.io/tasmoadmin/tasmoadmin:latest
+    container_name: tasmoadmin
+    hostname: tasmoadmin
     environment:
-      - PUID=1010
-      - PGID=1010
+      - TZ=Europe/Prague
     volumes:
-      - data_dzga:/config
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
+      - data_tasmoadmin:/data
     ports:
-      - 3030:3030
+      - 8081:80
+    logging:
+      driver: syslog
+      options:
+        tag: tasmoadmin
+    restart: unless-stopped
+
+  zigbee2mqtt:
+    image: ghcr.io/koenkk/zigbee2mqtt
+    container_name: zigbee2mqtt
+    hostname: zigbee2mqtt
+    environment:
+      - TZ=Europe/Prague
+      - ZIGBEE2MQTT_CONFIG_MQTT_SERVER=mqtt://mosquitto:1883 
+      - ZIGBEE2MQTT_CONFIG_FRONTEND_PORT=8080 
+    volumes:
+      - data_zigbee2mqtt:/app/data
+    ports:
+      - 8082:8080
+    logging:
+      driver: syslog
+      options:
+        tag: zigbee2mqtt
     restart: unless-stopped
 
 volumes:
   data_domoticz:
   data_mosquitto:
   data_mysgw:
-  data_dzga:
+  data_tasmoadmin:
+  data_zigbee2mqtt:
