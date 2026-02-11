@@ -8,6 +8,15 @@ if [ ! -e $DATA_DIR/scripts ]; then
   cp -r /opt/domoticz/scripts $DATA_DIR
 fi
 
+# copy default web templates
+mkdir -p $DATA_DIR/www/
+if [ ! -e $DATA_DIR/www/templates/ ]; then
+  echo "Populating default templates ..."
+  cp -r /opt/domoticz/www/templates $DATA_DIR/www/
+fi 
+mv /opt/domoticz/www/templates /opt/domoticz/www/templates.bak
+ln -s $DATA_DIR/www/templates /opt/domoticz/www/templates 
+
 # generate ssl certificate
 mkdir -p $DATA_DIR/keys
 
@@ -25,7 +34,9 @@ fi
 
 echo "Starting domoticz ..."
 if [ $1 == "/opt/domoticz/domoticz" ]; then
+        echo "$@"
   exec $@ -approot /opt/domoticz/ -userdata /config/ -noupdate 
 else
+        echo "$@"
   exec "$@"
 fi
