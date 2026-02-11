@@ -46,13 +46,12 @@ RUN echo "**** install domoticz required runtime packages ****" && \
     uvccapture && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-  rm /usr/lib/python3.11/EXTERNALLY-MANAGED && \
-  pip3 install \ 
+  #rm /usr/lib/python3.11/EXTERNALLY-MANAGED && \
+  pip3 install --break-system-packages \ 
     setuptools \
     requests \
-    pymodbus 
+    pymodbus==3.8.6
   
-
 RUN echo "**** install domoticz ****" && \ 
   OS="$(uname -s | sed 'y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/')" && \
   MACH=$(uname -m) && \
@@ -60,17 +59,13 @@ RUN echo "**** install domoticz ****" && \
   archive_file="domoticz_${OS}_${MACH}.tgz" && \
   version_file="version_${OS}_${MACH}.h" && \
   history_file="history_${OS}_${MACH}.txt" && \
-  curl -k -L https://releases.domoticz.com/releases/release/${archive_file} -o /tmp/domoticz.tgz && \
+  curl -k -L https://releases.domoticz.com/release/${archive_file} -o /tmp/domoticz.tgz && \
   tar xfz /tmp/domoticz.tgz && \
   mkdir -p /config && \
   if [ ${MACH} = "armv7l" ]; then \
-    ln -s /usr/lib/arm-linux-gnueabihf/libpython3.11.so.1 /usr/lib/arm-linux-gnueabihf/libpython3.11.so && \
-    wget http://security.debian.org/debian-security/pool/updates/main/o/openssl/libssl1.1_1.1.1n-0+deb11u5_armhf.deb && \
-    dpkg -i 'libssl1.1_1.1.1n-0+deb11u5_armhf.deb'; \
+    ln -s /usr/lib/arm-linux-gnueabihf/libpython3.11.so.1 /usr/lib/arm-linux-gnueabihf/libpython3.11.so; \
   else \
-    ln -s /usr/lib/x86_64-linux-gnu/libpython3.11.so.1 /usr/lib/x86_64-linux-gnu/libpython3.11.so && \
-    wget http://security.debian.org/debian-security/pool/updates/main/o/openssl/libssl1.1_1.1.1n-0+deb11u5_i386.deb && \
-    dpkg -i 'libssl1.1_1.1.1n-0+deb11u5_i386.deb'; \
+    ln -s /usr/lib/x86_64-linux-gnu/libpython3.11.so.1 /usr/lib/x86_64-linux-gnu/libpython3.11.so;  \
   fi && \
   rm -rf /tmp/* /var/tmp/*
 
@@ -78,12 +73,13 @@ RUN echo "**** set up environment ****" &&\
   echo "**** add user domoticz ****" && \
   useradd -d /config domoticz && \
   echo "**** add groups to access hardware ****" && \
-  groupadd -g 997 gpio && \  
-  groupadd -g 998 i2c && \  
+  groupadd -g 993 gpio && \  
+  groupadd -g 994 i2c && \  
   groupadd -g 999 spi && \  
   echo "**** add domoticz to appropriate groups ****" && \
   usermod -a -G dialout,gpio,i2c,spi domoticz && \
-  chown -R domoticz.users /config/
+  chown -R domoticz:users /config/ && \
+  setcap cap_net_raw+eip domoticz
 
 # copy local files
 COPY docker-entrypoint.sh /usr/local/bin/
@@ -93,7 +89,7 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 EXPOSE 1443 6144 8080
 
 # set volume
-VOLUME [${DATA_DIR}]
+VOLUME ["/config"]
 
 USER domoticz
 
