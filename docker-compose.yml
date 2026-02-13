@@ -117,7 +117,8 @@ services:
     environment:
       - TZ=Europe/Prague
       - ZIGBEE2MQTT_CONFIG_MQTT_SERVER=mqtt://mosquitto:1883 
-      - ZIGBEE2MQTT_CONFIG_FRONTEND_PORT=8080 
+      - ZIGBEE2MQTT_CONFIG_FRONTEND_ENABLED=true
+      - ZIGBEE2MQTT_CONFIG_FRONTEND_PORT=8080
     volumes:
       - data_zigbee2mqtt:/app/data
     ports:
